@@ -1,0 +1,10 @@
+node_modules
+coverage
+npm-debug.log
+zap
+.env*
+Makefile
+docker-compose.yml
+nodemon.json
+jest.config.js
+__tests__
