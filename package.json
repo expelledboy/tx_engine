@@ -1,0 +1,26 @@
+{
+  "name": "txjs",
+  "version": "1.0.0",
+  "description": "Dynamic nodejs transaction processing engine with REST api",
+  "dependencies": {
+    "basic-auth": "^2.0.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "debug": "^4.1.1",
+    "express": "^4.17.1",
+    "http-errors": "^1.7.3",
+    "mongoose": "^5.6.5",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "jest": "^24.8.0",
+    "mockingoose": "^2.13.1",
+    "nodemon": "^1.19.1"
+  },
+  "scripts": {
+    "test": "jest --coverage",
+    "test:watch": "jest --watchAll",
+    "start": "node ./src/api.js",
+    "dev": "DEBUG=tx:* nodemon ./src/api.js"
+  }
+}

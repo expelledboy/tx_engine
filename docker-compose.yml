@@ -1,0 +1,34 @@
+version: '3.4'
+
+services:
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - data:/data/db
+    ports:
+      - 27017:27017
+
+  api:
+    image: expelledboy/txjs
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+    environment:
+      - DEBUG=tx:*
+      - NODE_ENV=development
+      - EXTERNAL_URL=http://{HOST_IP}:3000
+      - PORT=3000
+    command:
+      npm run api:start
+
+  release:
+    image: expelledboy/txjs
+    build:
+      context: .
+      target: release
+
+volumes:
+  data:
