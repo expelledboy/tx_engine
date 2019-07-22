@@ -85,12 +85,53 @@ curl -v \
 	-d "$TRX"
 ```
 
-The `Transaction` object must have a `trx_id` and a list of `actions`.
+The result of the transaction might look similar to:
 
-Each `Action` should have a `name` which matches those installed, and `params`.
+```json
+{
+  "status": "completed",
+  "resolved": true,
+  "results": [true]
+}
+```
 
-The `params` can also include key value pairs that allow introspection into results
-of actions already executed in the transaction.
+Where the results list order correlates to each action.
+
+Or if there was an error during that step:
+
+```json
+{
+  "status": "rolledback",
+  "resolved": true,
+  "results": [
+    {
+      "status": "rolledback",
+      "result": true,
+      "error": {"perform":{"name":"Error","message":"myCrash"}}
+    }
+  ]
+}
+```
+
+## Specification
+
+`Transaction`
+
+```
+- UUID trx_id
+- LIST<Action> actions
+- INTEGER timeout (optional)
+```
+
+`Action`
+
+```
+- STRING name
+- MAP<STRING,STRING> params
+```
+
+The `params` can also include key value pairs that allow introspection
+into results of actions already executed in the transaction.
 
 Lets take the following `Transaction` specification:
 
@@ -106,7 +147,7 @@ Lets take the following `Transaction` specification:
 }
 ```
 
-Where we are on the last step 'pay', where 'get_accounts' resolved twice with the result:
+Where 'get_accounts' resolved twice with the result:
 
 ```json
 {
@@ -117,7 +158,7 @@ Where we are on the last step 'pay', where 'get_accounts' resolved twice with th
 }
 ```
 
-The `params` passed to the pay action will be:
+The `params` passed to the 'pay' action will be:
 
 ```json
 {

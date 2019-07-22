@@ -7,6 +7,11 @@ const ActionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    enum: ['new', 'processing', 'completed', 'rolledback', 'cancelled'],
+    default: 'new'
+  },
   params: Object,
   context: Object,
   result: Object,
@@ -24,17 +29,16 @@ const ActionSchema = new mongoose.Schema({
 ActionSchema
   .virtual('resolved')
   .get(function () {
-    return this.result !== undefined;
+    return !['new', 'processing'].includes(this.status);
   });
 
 ActionSchema
-  .virtual('status')
+  .virtual('detail')
   .get(function () {
-    if (!!this.error.perform && !!this.result) return 'rolledback';
-    if (this.result !== undefined && !this.context) return 'cancelled';
-    if (!!this.result) return 'completed';
-    if (!!this.context) return 'processing';
-    return 'new';
+    const detail = { status: this.status };
+    if (this.error.perform || this.error.rollback) Object.assign(detail, { error: this.error });
+    if (this.result) Object.assign(detail, { result: this.result });
+    return detail;
   });
 
 ActionSchema
@@ -58,18 +62,22 @@ ActionSchema.methods.start = function(trxResults = []) {
     return acc;
   }, {});
   this.context = assocEvolve(this.params || {}, data);
+  this.status = 'processing';
 };
 
 ActionSchema.methods.cancel = function() {
-  delete this.context;
-  this.result = null;
+  this.status = 'cancelled';
 };
 
 ActionSchema.methods.perform = function() {
+  if (this.status != 'processing')
+    throw Error(`bad state ${this.status}`);
+
   try {
     this.implementation.execute(this.context, (err, result) => {
       if (err) return Object.assign(this.error, { perform: err });
-      else this.result = result;
+      this.result = result;
+      this.status = 'completed';
     });
   } catch (e) {
     console.error(e);
@@ -78,11 +86,15 @@ ActionSchema.methods.perform = function() {
 };
 
 ActionSchema.methods.rollback = function() {
+  if (!this.status in ['processing', 'completed'])
+    throw Error(`bad state ${this.status}`);
+
   try {
     const result = this.error.perform || this.result;
     this.implementation.unexecute(this.context, result, (err, result) => {
       if (err) return Object.assign(this.error, { rollback: err });
-      else this.result = result;
+      this.result = result;
+      this.status = 'rolledback';
     });
   } catch (e) {
     console.error(e);

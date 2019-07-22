@@ -26,7 +26,7 @@ describe('mongoose Transaction model', () => {
     expect(trx.resolved).toBe(false);
     const processed = new Transaction({
       trx_id: uuid(),
-      actions: [{ name: 'test', result: { status: 0 } }]
+      actions: [{ name: 'test', status: 'completed' }]
     });
     expect(processed.resolved).toBe(true);
   });
@@ -44,7 +44,7 @@ describe('mongoose Transaction model', () => {
     await trx.complete();
     expect(trx.resolved).toBe(true);
     expect(trx.status).toBe('completed');
-    expect(trx.results).toEqual([
+    expect(trx.results).toMatchObject([
       { status: 1 },
       { status: 2 },
       { status: 3 }
@@ -66,10 +66,25 @@ describe('mongoose Transaction model', () => {
     await trx.complete();
     expect(trx.resolved).toBe(true);
     expect(trx.status).toBe('rolledback');
-    expect(trx.results).toEqual([
-      { status: 1 },
-      { status: 2 },
-      null,
+    expect(trx.results).toMatchObject([
+      {
+        status: 'rolledback',
+        result: { status: 1 }
+      },
+      {
+        status: 'rolledback',
+        result: { status: 2 },
+        error: {
+          perform: {
+            name: 'Error',
+            message: 'fatal crash',
+            reason:'crash'
+          }
+        }
+      },
+      {
+        status: 'cancelled',
+      }
     ]);
     expect(trx.actions[0].implementation.execute).toHaveBeenCalledTimes(2);
     expect(trx.actions[0].implementation.unexecute).toHaveBeenCalledTimes(2);
