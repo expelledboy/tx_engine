@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - data:/data/db
+    ports:
+      - 27017:27017
+
+  api:
+    image: expelledboy/txjs
+    ports:
+      - 3000:3000
+    volumes:
+      - ./actions:/actions
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=production
+      - SYSTEM_PASSWORD=secret
+      - DEBUG=tx:*
+    command:
+      npm start
+
+volumes:
+  data:

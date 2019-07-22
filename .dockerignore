@@ -8,3 +8,4 @@ docker-compose.yml
 nodemon.json
 jest.config.js
 __tests__
+example
