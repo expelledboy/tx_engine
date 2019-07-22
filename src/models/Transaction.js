@@ -37,7 +37,7 @@ TransactionSchema.methods.perform = async function() {
   await this.save();
 
   for (let action of this.actions) {
-    action.start();
+    action.start(this.results);
     await this.save();
 
     action.perform();
