@@ -5,6 +5,7 @@ const TransactionSchema = new mongoose.Schema({
   trx_id: {
     type: String,
     required: true,
+    unique : true,
   },
   status: {
     type: String,
