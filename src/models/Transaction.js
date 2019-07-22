@@ -28,8 +28,8 @@ TransactionSchema
 TransactionSchema
   .virtual('results')
   .get(function () {
-    if (this.resolved) return this.actions.map(action => action.result);
-    return this.actions;
+    const reduce = this.status == 'rolledback' ? 'detail' : 'result';
+    return this.actions.map(action => action[reduce]);
   });
 
 TransactionSchema.methods.perform = async function() {
@@ -37,7 +37,7 @@ TransactionSchema.methods.perform = async function() {
   await this.save();
 
   for (let action of this.actions) {
-    action.start(this.results);
+    action.start(this.actions);
     await this.save();
 
     action.perform();
@@ -57,7 +57,7 @@ TransactionSchema.methods.complete = async function() {
   await this.save();
   return {
     status: this.status,
-    resolved: this.resolved,
+    // resolved: this.resolved,
     results: this.results,
   }
 };

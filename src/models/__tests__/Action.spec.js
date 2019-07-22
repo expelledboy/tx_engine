@@ -11,24 +11,6 @@ beforeEach(() => {
 
 describe('mongoose Action model', () => {
 
-  it('is resolved when have result', () => {
-    const action = new Action({});
-    expect(action.resolved).toBe(false);
-    action.result = { status: 0 };
-    expect(action.resolved).toBe(true);
-  });
-
-  it('status is determined from model state', () => {
-    const action = new Action({});
-    expect(action.status).toBe('new');
-    action.context = {};
-    expect(action.status).toBe('processing');
-    action.result = { status: 0 };
-    expect(action.status).toBe('completed');
-    action.error = { perform: { status: 500 } };
-    expect(action.status).toBe('rolledback');
-  });
-
   it('will find implementation from action plugins by name', () => {
     const action = new Action({ name: 'mock' });
     expect(action.implementation.name).toBe(action.name);
