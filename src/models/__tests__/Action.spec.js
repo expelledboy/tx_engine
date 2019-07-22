@@ -56,4 +56,10 @@ describe('mongoose Action model', () => {
     expect(action.error.perform).toEqual({ name: 'Error', message: 'fatal crash', reason: 'error' });
   });
 
+  it('allows params to extract from transaction history', () => {
+    const action = new Action({ params: { $val: '$.action[0].value' } });
+    action.start([ { name: 'action', result: { value: true } } ]);
+    expect(action.context).toEqual({ val: true });
+  });
+
 });

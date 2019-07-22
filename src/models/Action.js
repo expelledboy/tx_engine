@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const actions = require('../action/manager.js');
+const { assocEvolve } = require('../utils.js');
 
 const ActionSchema = new mongoose.Schema({
   name: {
@@ -49,8 +50,14 @@ const parseError = err => Object.assign({}, {
   message: err.message,
 }, JSON.parse(JSON.stringify(err)));
 
-ActionSchema.methods.start = function() {
-  this.context = this.params || {};
+ActionSchema.methods.start = function(trxResults = []) {
+  // have action in history be grouped by name eg: $.action[i].result.value
+  const data = trxResults.reduce((acc, { name, result }) => {
+    if (!acc[name]) acc[name] = [];
+    acc[name].push(result);
+    return acc;
+  }, {});
+  this.context = assocEvolve(this.params || {}, data);
 };
 
 ActionSchema.methods.cancel = function() {
