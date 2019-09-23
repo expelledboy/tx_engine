@@ -9,14 +9,14 @@ Create a collection of actions with the following interface:
 
 $ cat example/actions/log.js
 ```js
-function execute(context, cb) {
+async function execute(context) {
   console.log({ context });
-  cb(null, true);
+  return true;
 }
 
-function unexecute(context, error, cb) {
+async function unexecute(context, error) {
   console.log({ context, error });
-  cb(null, true);
+  return true;
 }
 
 module.exports = {

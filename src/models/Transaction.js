@@ -41,7 +41,7 @@ TransactionSchema.methods.perform = async function() {
     action.start(this.actions);
     await this.save();
 
-    action.perform();
+    await action.perform();
     await this.save();
 
     if (!action.resolved) break;
