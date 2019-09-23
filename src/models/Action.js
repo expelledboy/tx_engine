@@ -69,33 +69,29 @@ ActionSchema.methods.cancel = function() {
   this.status = 'cancelled';
 };
 
-ActionSchema.methods.perform = function() {
+ActionSchema.methods.perform = async function() {
   if (this.status != 'processing')
     throw Error(`bad state ${this.status}`);
 
   try {
-    this.implementation.execute(this.context, (err, result) => {
-      if (err) return Object.assign(this.error, { perform: err });
-      this.result = result;
-      this.status = 'completed';
-    });
+    const result = await this.implementation.execute(this.context);
+    this.result = result;
+    this.status = 'completed';
   } catch (e) {
     console.error(e);
     Object.assign(this.error, { perform: parseError(e) });
   }
 };
 
-ActionSchema.methods.rollback = function() {
+ActionSchema.methods.rollback = async function() {
   if (!this.status in ['processing', 'completed'])
     throw Error(`bad state ${this.status}`);
 
   try {
-    const result = this.error.perform || this.result;
-    this.implementation.unexecute(this.context, result, (err, result) => {
-      if (err) return Object.assign(this.error, { rollback: err });
-      this.result = result;
-      this.status = 'rolledback';
-    });
+    const prevResult = this.error.perform || this.result;
+    const result = await this.implementation.unexecute(this.context, prevResult);
+    this.result = result;
+    this.status = 'rolledback';
   } catch (e) {
     console.error(e);
     Object.assign(this.error, { rollback: parseError(e) });

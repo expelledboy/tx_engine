@@ -18,27 +18,27 @@ describe('mongoose Action model', () => {
     expect(action.implementation.unexecute).toBeInstanceOf(Function);
   });
 
-  it('assign to the result when performing or rolling back action', () => {
+  it('assign to the result when performing or rolling back action', async () => {
     const action = new Action({ name: 'mock' });
     action.start();
-    action.perform();
+    await action.perform();
     expect(action.result).toEqual({ status: 0 });
     const failed = new Action({ name: 'mock', params: { throw: 'error' } });
     failed.start();
-    failed.perform();
+    await failed.perform();
     expect(failed.result).toBeUndefined();
-    failed.rollback();
+    await failed.rollback();
     expect(failed.result).toEqual({ status: 0 });
   });
 
-  it('assign an error when failing performing action', () => {
+  it('assign an error when failing performing action', async () => {
     const action = new Action({ name: 'mock', params: { throw: 'error' } });
     action.start();
-    action.perform();
+    await action.perform();
     expect(action.error.perform).toEqual({ name: 'Error', message: 'fatal crash', reason: 'error' });
   });
 
-  it('allows params to extract from transaction history', () => {
+  it('allows params to extract from transaction history', async () => {
     const action = new Action({ params: { $val: '$.action[0].value' } });
     action.start([ { name: 'action', result: { value: true } } ]);
     expect(action.context).toEqual({ val: true });

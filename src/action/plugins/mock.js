@@ -1,6 +1,6 @@
 const debug = require('debug')('tx:mock:action');
 
-function execute(context, cb) {
+async function execute(context) {
   let { throw: exception, delay } = context;
 
   if (exception) {
@@ -17,18 +17,18 @@ function execute(context, cb) {
     debug('async %o', context);
     setTimeout(function() {
       debug('done');
-      return cb(null, result);
+      return result;
     }, delay);
   } else {
     debug('execute %o', context);
-    return cb(null, result);
+    return result;
   }
 }
 
-function unexecute(context, error, cb) {
+async function unexecute(context, error) {
   debug('unexecute %o %o', context, error);
   const result = { status: context.status || 0 };
-  cb(null, result);
+  return result;
 }
 
 module.exports = {
