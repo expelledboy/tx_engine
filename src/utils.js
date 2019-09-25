@@ -3,17 +3,17 @@ function isObject (value) {
 }
 
 const assocEvolve = (obj, data) => {
-  const $ = data;
+  const _ = data;
 
   const scan = (src, dest) => Object
     .entries(src)
     .forEach(([key, value]) => {
 
       // ratify key value from data
-      if (key.startsWith('$')) {
+      if (key.startsWith('_')) {
         try {
           value = eval(value);
-          key = key.replace(/^\$/, '');
+          key = key.replace(/^_/, '');
           dest[key] = value;
         } catch (e) {
           throw new Error(`path ${value} not found in data`)
