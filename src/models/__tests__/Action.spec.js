@@ -39,7 +39,7 @@ describe('mongoose Action model', () => {
   });
 
   it('allows params to extract from transaction history', async () => {
-    const action = new Action({ params: { $val: '$.action[0].value' } });
+    const action = new Action({ params: { _val: '_.action[0].value' } });
     action.start([ { name: 'action', result: { value: true } } ]);
     expect(action.context).toEqual({ val: true });
   });

@@ -142,7 +142,7 @@ Lets take the following `Transaction` specification:
     {"name":"get_accounts","params":{}},
     {"name":"check_balance","params":{}},
     {"name":"get_accounts","params":{}},
-    {"name":"pay","params":{"$from_account":"$.get_accounts[1].accounts[0]"}}
+    {"name":"pay","params":{"_from_account":"_.get_accounts[1].accounts[0]"}}
   ]
 }
 ```
