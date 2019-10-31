@@ -1,4 +1,4 @@
-const { resolve } = require('path');
+const { resolve } = require('path')
 
 // https://jestjs.io/docs/en/configuration.html
 module.exports = {
@@ -9,4 +9,4 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverage: true,
   bail: true
-};
+}

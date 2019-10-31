@@ -1,29 +1,28 @@
-const debug = require('debug')('tx:action');
-const glob = require('glob');
-const path = require('path');
-const config = require('../config.js');
+const debug = require('debug')('tx:action')
+const glob = require('glob')
+const config = require('../config.js')
 
-const actions = {};
+const actions = {}
 
-const action_interface = ['execute', 'name', 'unexecute'];
-const match_interface = mod => {
+const actionInterface = ['execute', 'name', 'unexecute']
+const matchInterface = mod => {
   const match = Object
     .keys(mod)
     .sort()
-    .filter((prop, idx) => prop == action_interface[idx]);
-  return match.length == action_interface.length;
+    .filter((prop, idx) => prop === actionInterface[idx])
+  return match.length === actionInterface.length
 }
 
 debug(`loading actions from ${config.action.plugin_dir}`)
 glob.sync(`${config.action.plugin_dir}/*.js`).forEach(function (filename) {
-  const action = require(filename);
-  if (!match_interface(action)) return;
+  const action = require(filename)
+  if (!matchInterface(action)) return
   debug(`loaded action ${action.name}`)
-  actions[action.name] = action;
-});
+  actions[action.name] = action
+})
 
-const find = name => actions[name];
+const find = name => actions[name]
 
 module.exports = {
-  find,
-};
+  find
+}

@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const actions = require('../action/manager.js');
-const { assocEvolve } = require('../utils.js');
+const mongoose = require('mongoose')
+const actions = require('../action/manager.js')
+const { assocEvolve } = require('../utils.js')
 
 const ActionSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: true
   },
   status: {
     type: String,
@@ -17,85 +17,83 @@ const ActionSchema = new mongoose.Schema({
   result: Object,
   error: {
     perform: Object,
-    rollback: Object,
+    rollback: Object
   }
 }, {
   timestamps: {
     createdAt: 'created_at',
     updatedAt: 'updated_at'
   }
-});
+})
 
 ActionSchema
   .virtual('resolved')
   .get(function () {
-    return !['new', 'processing'].includes(this.status);
-  });
+    return !['new', 'processing'].includes(this.status)
+  })
 
 ActionSchema
   .virtual('detail')
   .get(function () {
-    const detail = { status: this.status };
-    if (this.error.perform || this.error.rollback) Object.assign(detail, { error: this.error });
-    if (this.result) Object.assign(detail, { result: this.result });
-    return detail;
-  });
+    const detail = { status: this.status }
+    if (this.error.perform || this.error.rollback) Object.assign(detail, { error: this.error })
+    if (this.result) Object.assign(detail, { result: this.result })
+    return detail
+  })
 
 ActionSchema
   .virtual('implementation')
   .get(function () {
-    const action = actions.find(this.name);
-    if (!action) throw Error(`no implementation for action ${this.name}`);
-    return actions.find(this.name);
-  });
+    const action = actions.find(this.name)
+    if (!action) throw Error(`no implementation for action ${this.name}`)
+    return actions.find(this.name)
+  })
 
 const parseError = err => Object.assign({}, {
   name: err.name,
-  message: err.message,
-}, JSON.parse(JSON.stringify(err)));
+  message: err.message
+}, JSON.parse(JSON.stringify(err)))
 
-ActionSchema.methods.start = function(trxResults = []) {
+ActionSchema.methods.start = function (trxResults = []) {
   // have action in history be grouped by name eg: $.action[i].result.value
   const data = trxResults.reduce((acc, { name, result }) => {
-    if (!acc[name]) acc[name] = [];
-    acc[name].push(result);
-    return acc;
-  }, {});
-  this.context = assocEvolve(this.params || {}, data);
-  this.status = 'processing';
-};
+    if (!acc[name]) acc[name] = []
+    acc[name].push(result)
+    return acc
+  }, {})
+  this.context = assocEvolve(this.params || {}, data)
+  this.status = 'processing'
+}
 
-ActionSchema.methods.cancel = function() {
-  this.status = 'cancelled';
-};
+ActionSchema.methods.cancel = function () {
+  this.status = 'cancelled'
+}
 
-ActionSchema.methods.perform = async function() {
-  if (this.status != 'processing')
-    throw Error(`bad state ${this.status}`);
-
-  try {
-    const result = await this.implementation.execute(this.context);
-    this.result = result;
-    this.status = 'completed';
-  } catch (e) {
-    console.error(e);
-    Object.assign(this.error, { perform: parseError(e) });
-  }
-};
-
-ActionSchema.methods.rollback = async function() {
-  if (!this.status in ['processing', 'completed'])
-    throw Error(`bad state ${this.status}`);
+ActionSchema.methods.perform = async function () {
+  if (this.status !== 'processing') { throw Error(`bad state ${this.status}`) }
 
   try {
-    const prevResult = this.error.perform || this.result;
-    const result = await this.implementation.unexecute(this.context, prevResult);
-    this.result = result;
-    this.status = 'rolledback';
+    const result = await this.implementation.execute(this.context)
+    this.result = result
+    this.status = 'completed'
   } catch (e) {
-    console.error(e);
-    Object.assign(this.error, { rollback: parseError(e) });
+    console.error(e)
+    Object.assign(this.error, { perform: parseError(e) })
   }
-};
+}
 
-module.exports = mongoose.model('action', ActionSchema);
+ActionSchema.methods.rollback = async function () {
+  if (!(this.status in ['processing', 'completed'])) { throw Error(`bad state ${this.status}`) }
+
+  try {
+    const prevResult = this.error.perform || this.result
+    const result = await this.implementation.unexecute(this.context, prevResult)
+    this.result = result
+    this.status = 'rolledback'
+  } catch (e) {
+    console.error(e)
+    Object.assign(this.error, { rollback: parseError(e) })
+  }
+}
+
+module.exports = mongoose.model('action', ActionSchema)

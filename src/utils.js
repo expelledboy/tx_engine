@@ -1,43 +1,34 @@
 function isObject (value) {
-  return value && typeof value === 'object' && value.constructor === Object;
+  return value && typeof value === 'object' && value.constructor === Object
 }
 
 const assocEvolve = (obj, data) => {
-  const _ = data;
+  const _ = data // eslint-disable-line
 
   const scan = (src, dest) => Object
     .entries(src)
     .forEach(([key, value]) => {
-
-      // ratify key value from data
-      if (key.startsWith('_')) {
+      if (key.startsWith('_')) { // ratify key value from data
         try {
-          value = eval(value);
-          key = key.replace(/^_/, '');
-          dest[key] = value;
+          value = eval(value) // eslint-disable-line
+          key = key.replace(/^_/, '')
+          dest[key] = value
         } catch (e) {
           throw new Error(`path ${value} not found in data`)
         }
-      }
-
-      // recursively apply to sub object
-      else if (isObject(value)) {
-        const sub = dest[key] = {};
+      } else if (isObject(value)) { // recursively apply to sub object
+        const sub = dest[key] = {}
         scan(value, sub)
+      } else { // simple value, simple assign
+        dest[key] = value
       }
+    })
 
-      // simple value, simple assign
-      else {
-        dest[key] = value;
-      }
-
-    });
-
-  const result = {};
-  scan(obj, result);
-  return result;
-};
+  const result = {}
+  scan(obj, result)
+  return result
+}
 
 module.exports = {
-  assocEvolve,
+  assocEvolve
 }
