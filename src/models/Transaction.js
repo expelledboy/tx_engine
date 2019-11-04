@@ -7,9 +7,15 @@ const TransactionSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  meta: Object,
   status: {
     type: String,
-    enum: ['new', 'processing', 'completed', 'rolledback'],
+    enum: [
+      'new',
+      'processing',
+      'completed',
+      'rolledback'
+    ],
     default: 'new'
   },
   actions: [action.schema]

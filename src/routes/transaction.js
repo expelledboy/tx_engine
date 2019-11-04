@@ -1,4 +1,5 @@
 const express = require('express')
+const JSONStream = require('JSONStream')
 const router = express.Router()
 const Transaction = require('../models/Transaction.js')
 
@@ -37,6 +38,25 @@ router.post('/', async (req, res) => {
     console.error(e)
     res.status(500).send()
   }
+})
+
+router.post('/query', async (req, res) => {
+  // XXX: For performance reasons we can only query meta.
+
+  const notMeta = ['skip', 'limit']
+  const query = Object.keys(req.body).reduce(function (result, key) {
+    if (notMeta.includes(key)) return result
+    result[`meta.${key}`] = req.body[key]
+    return result
+  }, {})
+
+  Transaction
+    .find(query)
+    .skip(req.body.skip || 0)
+    .limit(req.body.limit || 10)
+    .cursor()
+    .pipe(JSONStream.stringify())
+    .pipe(res.type('json'))
 })
 
 module.exports = router
