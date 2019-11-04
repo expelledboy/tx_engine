@@ -29,6 +29,11 @@ const assocEvolve = (obj, data) => {
   return result
 }
 
+const isMember = (value, list) => {
+  return list.findIndex(x => x === value) > -1
+}
+
 module.exports = {
-  assocEvolve
+  assocEvolve,
+  isMember
 }

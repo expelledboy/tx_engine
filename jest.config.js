@@ -7,6 +7,5 @@ module.exports = {
   modulePathIgnorePatterns: ['helpers.js'],
   coverageDirectory: resolve(__dirname, 'coverage'),
   coverageReporters: ['text', 'html'],
-  collectCoverage: true,
   bail: true
 }

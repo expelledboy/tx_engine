@@ -15,10 +15,10 @@ async function execute (context) {
 
   if (delay) {
     debug('async %o', context)
-    setTimeout(function () {
+    return Promise(resolve => setTimeout(function () {
       debug('done')
-      return result
-    }, delay)
+      resolve(result)
+    }, delay))
   } else {
     debug('execute %o', context)
     return result

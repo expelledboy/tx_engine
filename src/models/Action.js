@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const actions = require('../action/manager.js')
-const { assocEvolve } = require('../utils.js')
+const { assocEvolve, isMember } = require('../utils.js')
 
 const ActionSchema = new mongoose.Schema({
   name: {
@@ -70,7 +70,9 @@ ActionSchema.methods.cancel = function () {
 }
 
 ActionSchema.methods.perform = async function () {
-  if (this.status !== 'processing') { throw Error(`bad state ${this.status}`) }
+  if (this.status !== 'processing') {
+    throw Error(`bad state ${this.status}`)
+  }
 
   try {
     const result = await this.implementation.execute(this.context)
@@ -83,7 +85,9 @@ ActionSchema.methods.perform = async function () {
 }
 
 ActionSchema.methods.rollback = async function () {
-  if (!(this.status in ['processing', 'completed'])) { throw Error(`bad state ${this.status}`) }
+  if (!['processing', 'completed'].includes(this.status)) {
+    throw Error(`bad state ${this.status}`)
+  }
 
   try {
     const prevResult = this.error.perform || this.result
