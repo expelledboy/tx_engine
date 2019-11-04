@@ -43,17 +43,20 @@ router.post('/', async (req, res) => {
 router.post('/query', async (req, res) => {
   // XXX: For performance reasons we can only query meta.
 
-  const notMeta = ['skip', 'limit']
+  const notMeta = ['pageSize', 'page']
   const query = Object.keys(req.body).reduce(function (result, key) {
     if (notMeta.includes(key)) return result
     result[`meta.${key}`] = req.body[key]
     return result
   }, {})
 
+  const limit = req.body.pageSize || 10
+  const skip = limit * ((req.body.page || 1) - 1)
+
   Transaction
     .find(query)
-    .skip(req.body.skip || 0)
-    .limit(req.body.limit || 10)
+    .skip(skip)
+    .limit(limit)
     .cursor()
     .pipe(JSONStream.stringify())
     .pipe(res.type('json'))

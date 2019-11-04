@@ -6,8 +6,8 @@ source gen_type.sh
 read -r -d '' TRX <<EOF
 {
   "type":"$trx_type",
-  "limit": 3,
-  "skip": 1
+  "pageSize": 3,
+  "page": 1
 }
 EOF
 
