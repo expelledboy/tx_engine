@@ -9,7 +9,10 @@ read -r -d '' TRX <<EOF
   "meta": {"type":"$trx_type"},
   "actions": [
     {"name":"log","params":{"data":true}}
-  ]
+  ],
+  "_result": {
+    "_data": "_.log[0].data"
+  }
 }
 EOF
 

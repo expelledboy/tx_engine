@@ -39,12 +39,23 @@ TransactionSchema
     return this.actions.map(action => action[reduce])
   })
 
+TransactionSchema
+  .virtual('data')
+  .get(function () {
+    // have action in history be grouped by name eg: _.action[i].result.value
+    return this.actions.reduce((acc, { name, result }) => {
+      if (!acc[name]) acc[name] = []
+      acc[name].push(result)
+      return acc
+    }, {})
+  })
+
 TransactionSchema.methods.perform = async function () {
   this.status = 'processing'
   await this.save()
 
   for (const action of this.actions) {
-    action.start(this.actions)
+    action.start(this.data)
     await this.save()
 
     await action.perform()

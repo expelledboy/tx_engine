@@ -2,6 +2,7 @@ const express = require('express')
 const JSONStream = require('JSONStream')
 const router = express.Router()
 const Transaction = require('../models/Transaction.js')
+const { assocEvolve } = require('../utils.js')
 
 router.post('/', async (req, res) => {
   try {
@@ -23,6 +24,12 @@ router.post('/', async (req, res) => {
     }
 
     const result = await trx.complete()
+
+    if (req.body._result) {
+      const meta = assocEvolve(req.body._result, trx.data)
+      trx.meta = Object.assign(meta, trx.meta)
+      trx.save()
+    }
 
     res.status(200).json(result)
   } catch (e) {

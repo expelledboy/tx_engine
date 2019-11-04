@@ -1,11 +1,11 @@
 async function execute (context) {
   console.log({ context })
-  return true
+  return context
 }
 
 async function unexecute (context, error) {
   console.log({ context, error })
-  return true
+  return context
 }
 
 module.exports = {

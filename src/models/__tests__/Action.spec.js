@@ -1,4 +1,5 @@
 const mockingoose = require('mockingoose').default
+const Transaction = require('../Transaction.js')
 const Action = require('../Action.js')
 
 // disable action error logging
@@ -37,8 +38,13 @@ describe('mongoose Action model', () => {
   })
 
   it('allows params to extract from transaction history', async () => {
-    const action = new Action({ params: { _val: '_.action[0].value' } })
-    action.start([{ name: 'action', result: { value: true } }])
+    const trx = new Transaction({
+      actions: [{ name: 'action', result: { value: true } }]
+    })
+    const action = new Action({
+      params: { _val: '_.action[0].value' }
+    })
+    action.start(trx.data)
     expect(action.context).toEqual({ val: true })
   })
 })
