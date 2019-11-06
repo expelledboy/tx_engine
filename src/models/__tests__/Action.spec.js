@@ -1,50 +1,54 @@
-const mockingoose = require('mockingoose').default
-const Transaction = require('../Transaction.js')
-const Action = require('../Action.js')
+const mockingoose = require("mockingoose").default;
+const Transaction = require("../Transaction.js");
+const Action = require("../Action.js");
 
 // disable action error logging
-console.error = jest.fn()
+console.error = jest.fn();
 
 beforeEach(() => {
-  mockingoose.resetAll()
-})
+  mockingoose.resetAll();
+});
 
-describe('mongoose Action model', () => {
-  it('will find implementation from action plugins by name', () => {
-    const action = new Action({ name: 'mock' })
-    expect(action.implementation.name).toBe(action.name)
-    expect(action.implementation.execute).toBeInstanceOf(Function)
-    expect(action.implementation.unexecute).toBeInstanceOf(Function)
-  })
+describe("mongoose Action model", () => {
+  it("will find implementation from action plugins by name", () => {
+    const action = new Action({ name: "mock" });
+    expect(action.implementation.name).toBe(action.name);
+    expect(action.implementation.execute).toBeInstanceOf(Function);
+    expect(action.implementation.unexecute).toBeInstanceOf(Function);
+  });
 
-  it('assign to the result when performing or rolling back action', async () => {
-    const action = new Action({ name: 'mock' })
-    action.start()
-    await action.perform()
-    expect(action.result).toEqual({ status: 0 })
-    const failed = new Action({ name: 'mock', params: { throw: 'error' } })
-    failed.start()
-    await failed.perform()
-    expect(failed.result).toBeUndefined()
-    await failed.rollback()
-    expect(failed.result).toEqual({ status: 0 })
-  })
+  it("assign to the result when performing or rolling back action", async () => {
+    const action = new Action({ name: "mock" });
+    action.start();
+    await action.perform();
+    expect(action.result).toEqual({ status: 0 });
+    const failed = new Action({ name: "mock", params: { throw: "error" } });
+    failed.start();
+    await failed.perform();
+    expect(failed.result).toBeUndefined();
+    await failed.rollback();
+    expect(failed.result).toEqual({ status: 0 });
+  });
 
-  it('assign an error when failing performing action', async () => {
-    const action = new Action({ name: 'mock', params: { throw: 'error' } })
-    action.start()
-    await action.perform()
-    expect(action.error.perform).toEqual({ name: 'Error', message: 'fatal crash', reason: 'error' })
-  })
+  it("assign an error when failing performing action", async () => {
+    const action = new Action({ name: "mock", params: { throw: "error" } });
+    action.start();
+    await action.perform();
+    expect(action.error.perform).toEqual({
+      name: "Error",
+      message: "fatal crash",
+      reason: "error"
+    });
+  });
 
-  it('allows params to extract from transaction history', async () => {
+  it("allows params to extract from transaction history", async () => {
     const trx = new Transaction({
-      actions: [{ name: 'action', result: { value: true } }]
-    })
+      actions: [{ name: "action", result: { value: true } }]
+    });
     const action = new Action({
-      params: { _val: '_.action[0].value' }
-    })
-    action.start(trx.data)
-    expect(action.context).toEqual({ val: true })
-  })
-})
+      params: { _val: "_.action[0].value" }
+    });
+    action.start(trx.data);
+    expect(action.context).toEqual({ val: true });
+  });
+});

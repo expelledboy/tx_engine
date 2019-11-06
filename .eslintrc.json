@@ -1,16 +1,15 @@
 {
+  "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "env": {
-    "commonjs": true,
-    "es6": true,
     "node": true,
+    "es6": true,
     "jest": true
-  },
-  "extends": [ "standard" ],
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2018
+  },
+  "rules": {
+    "no-console": "off",
+    "no-underscore-dangle": "off"
   }
 }
