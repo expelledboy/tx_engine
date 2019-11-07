@@ -27,9 +27,14 @@ router.post("/", async (req, res) => {
     const result = await trx.complete();
 
     if (req.body._result) {
-      const meta = assocEvolve(req.body._result, trx.data);
-      trx.meta = Object.assign(meta, trx.meta);
-      trx.save();
+      try {
+        // TODO: This isnt safe with n instances of txjs.
+        const meta = assocEvolve(req.body._result, trx.data);
+        trx.meta = Object.assign(meta, trx.meta);
+        trx.save();
+      } catch (e) {
+        console.error("Failed generate meta from results", e);
+      }
     }
 
     return res.status(200).json(result);

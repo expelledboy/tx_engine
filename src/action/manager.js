@@ -8,7 +8,7 @@ const actionInterface = ["execute", "name", "unexecute"];
 const matchInterface = mod => {
   const match = Object.keys(mod)
     .sort()
-    .filter((prop, idx) => prop === actionInterface[idx]);
+    .filter(prop => actionInterface.includes(prop));
   return match.length === actionInterface.length;
 };
 
